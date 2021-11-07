@@ -4,11 +4,17 @@ import { PolicyService } from './policy.service';
 
 describe('PolicyController', () => {
   let controller: PolicyController;
+  const policyService = { createPolicy: () => ['test'] };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PolicyController],
-      providers: [PolicyService],
+      providers: [
+        {
+          provide: PolicyService,
+          useValue: policyService,
+        },
+      ],
     }).compile();
 
     controller = module.get<PolicyController>(PolicyController);
