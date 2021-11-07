@@ -1,14 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PolicyService } from './policy.service';
 import { GenericContainer, StartedTestContainer } from 'testcontainers';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Policy } from './entities/policy.entity';
 import { PolicyRepository } from './policy.repository';
 
-describe('PolicyService', () => {
-  let service: PolicyService;
-  let container: StartedTestContainer;
+describe('PolicyRepository', () => {
   let repository: PolicyRepository;
+  let container: StartedTestContainer;
 
   beforeAll(async () => {
     container = await new GenericContainer('postgres')
@@ -30,10 +28,8 @@ describe('PolicyService', () => {
         }),
         TypeOrmModule.forFeature([PolicyRepository]),
       ],
-      providers: [PolicyService],
     }).compile();
     repository = module.get<PolicyRepository>(PolicyRepository);
-    service = module.get<PolicyService>(PolicyService);
   });
 
   beforeEach(async () => {
@@ -44,11 +40,11 @@ describe('PolicyService', () => {
   });
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
+    expect(repository).toBeDefined();
   });
 
   it('should create a policy', async () => {
-    const policy = await service.createPolicy({
+    const policy = await repository.createPolicy({
       domain: 'prod',
       roleId: '123-123',
       resourceId: '12',
@@ -106,7 +102,7 @@ describe('PolicyService', () => {
             actions: ['prod:read', 'prod:update'],
           },
         ].map(async (value) => {
-          await service.createPolicy({
+          await repository.createPolicy({
             domain: value.domain,
             roleId: value.roleId,
             resourceId: value.resource,
@@ -121,8 +117,8 @@ describe('PolicyService', () => {
       await repository.delete({});
     });
 
-    it('should find resources by roles and domain', async () => {
-      await service.createPolicy({
+    it('should find policies by roles and domain', async () => {
+      await repository.createPolicy({
         domain: 'prod',
         roleId: '123-123',
         resourceId: '1',
@@ -130,84 +126,74 @@ describe('PolicyService', () => {
         actions: ['prod:read', 'prod:update'],
       });
 
-      const resources = await service.findAllResourceByRolesAndDomain(
+      const policies = await repository.findAllByRoleIdAndDomain(
         ['123-123'],
         'prod',
       );
-      expect(resources.length).toBe(3);
-      expect(resources).toEqual([
-        { resourceId: '1', tenancyId: 'acc1' },
-        { resourceId: '11', tenancyId: 'acc2' },
-        { resourceId: '12', tenancyId: 'acc1' },
-      ]);
+      expect(policies.length).toBe(3);
+      expect(policies[0].resourceId).toBe('1');
 
-      const resourcesForProd1 = await service.findAllResourceByRolesAndDomain(
+      const policiesForProd1 = await repository.findAllByRoleIdAndDomain(
         ['123-123'],
         'prod1',
       );
-      expect(resourcesForProd1.length).toBe(2);
-      expect(resourcesForProd1).toEqual(
-        expect.arrayContaining([
-          { resourceId: '14', tenancyId: 'acc1' },
-          { resourceId: '13', tenancyId: 'acc2' },
-        ]),
-      );
+      expect(policiesForProd1.length).toBe(2);
 
       const policiesForProd1ForRole345 =
-        await service.findAllResourceByRolesAndDomain(['345'], 'prod1');
+        await repository.findAllByRoleIdAndDomain(['345'], 'prod1');
       expect(policiesForProd1ForRole345.length).toBe(0);
     });
 
     it('should get policyBy Id', async () => {
-      const policy = await service.createPolicy({
+      const policy = await repository.createPolicy({
         domain: 'prod',
         roleId: '123-123',
         resourceId: '1',
         tenancyId: 'acc1',
         actions: ['prod:read', 'prod:update'],
       });
-      const policySaved = await service.findOne(policy.id);
+      const policySaved = await repository.findOne(policy.id);
       expect(policy).toEqual(policySaved);
     });
 
-    it('should get actions which have [read,write] actions', async () => {
-      const actions = await service.allowedActionsOnResource(
+    it('should get Policies which have [read,write] actions', async () => {
+      const policies = await repository.findAllApplicablePolicies(
         ['123-123'],
         'prod',
         '12',
         ['prod:read', 'prod:write'],
       );
-      expect(actions).toEqual(['prod:read', 'prod:write']);
+      expect(policies.length).toBe(1);
     });
 
-    it('should get no actions which does not have [read, update] actions', async () => {
-      const actions = await service.allowedActionsOnResource(
+    it('should get no Policies which does not have [read, update] actions', async () => {
+      const policies = await repository.findAllApplicablePolicies(
         ['123-123'],
         'prod',
         '12',
         ['prod:read', 'prod:update'],
       );
-      expect(actions.length).toBe(0);
+      expect(policies.length).toBe(0);
     });
 
-    it('should get no actions which does not have [update] actions', async () => {
-      const actions = await service.allowedActionsOnResource(
+    it('should get no Policies which does not have [update] actions', async () => {
+      const policies = await repository.findAllApplicablePolicies(
         ['123-123'],
         'prod',
         '12',
         ['prod:update'],
       );
-      expect(actions.length).toBe(0);
+      expect(policies.length).toBe(0);
     });
 
-    it('should get actions which has read permission', async () => {
-      const actions = await service.allowedActionsOnResource(
+    it('should get a Policy which has read permission', async () => {
+      const policies = await repository.findAllApplicablePolicies(
         ['123-123'],
         'prod',
         '12',
         ['prod:read'],
       );
-      expect(actions).toEqual(['prod:read', 'prod:write']);
+      expect(policies.length).toBe(1);
     });
   });
 });

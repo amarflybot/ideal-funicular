@@ -10,6 +10,7 @@ import {
 import { PolicyService } from './policy.service';
 import { CreatePolicyDto } from './dto/create-policy.dto';
 import { UpdatePolicyDto } from './dto/update-policy.dto';
+import { SearchPolicyDto } from './dto/search-policy.dto';
 
 @Controller('policy')
 export class PolicyController {
@@ -17,12 +18,15 @@ export class PolicyController {
 
   @Post()
   create(@Body() createPolicyDto: CreatePolicyDto) {
-    return this.policyService.create(createPolicyDto);
+    return this.policyService.createPolicy(createPolicyDto);
   }
 
-  @Get()
-  findAll() {
-    return this.policyService.findAll();
+  @Post('search')
+  findAllByRoleIdAndDomain(@Body() searchPolicyDto: SearchPolicyDto) {
+    return this.policyService.findAllResourceByRolesAndDomain(
+      searchPolicyDto.roleIds,
+      searchPolicyDto.domain,
+    );
   }
 
   @Get(':id')
