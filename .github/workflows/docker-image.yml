@@ -22,19 +22,21 @@ jobs:
         npm run lint
 
   start:
-
+    needs: buildAndTest
     runs-on: ubuntu-latest
-
+    environment:
+      name: dev
     steps:
     - uses: actions/checkout@v2
 
     - name: node install
       run: |
+        echo ${{env.SECRET}}
         npm i
         npm run start
 
   deploy:
-
+    needs: start
     runs-on: ubuntu-latest
     
     steps:
