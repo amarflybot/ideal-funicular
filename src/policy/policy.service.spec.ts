@@ -209,5 +209,8 @@ describe('PolicyService', () => {
       );
       expect(actions).toEqual(['prod:read', 'prod:write']);
     });
+    it('should failt this test', () => {
+      expect(1).toBe(2);
+    })
   });
 });
