@@ -31,17 +31,17 @@ jobs:
 
     - name: node install
       run: |
-        echo ${{env.SECRET}}
+        echo ${{ env.SECRET }}
         npm i
         npm run start
 
   deploy:
     needs: start
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: docker build
       run: docker build . --file Dockerfile --tag amarflybot/ideal-funicular:$(date +%s)
-    
+
