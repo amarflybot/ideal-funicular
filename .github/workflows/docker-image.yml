@@ -17,7 +17,12 @@ jobs:
     - name: Print latest message
       run: echo ${{ github.event.head_commit.message }}
 
-    - uses: actions/checkout@v2
+    - name: node install and test
+      run: |
+        npm i
+        npm run test
+        npm run lint
+
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag amarflybot/ideal-funicular:$(date +%s)
     
