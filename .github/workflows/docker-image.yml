@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: ideal-funicular build job
 
 on:
   push:
@@ -8,21 +8,38 @@ on:
 
 jobs:
 
-  build:
+  buildAndTest:
 
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
-    - name: Print latest message
-      run: echo ${{ github.event.head_commit.message }}
 
-    - name: node install and test
+    - name: node install
       run: |
         npm i
         npm run test
         npm run lint
 
-    - name: Build the Docker image
+  start:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: node install
+      run: |
+        npm i
+        npm run start
+
+  deploy:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: docker build
       run: docker build . --file Dockerfile --tag amarflybot/ideal-funicular:$(date +%s)
     
