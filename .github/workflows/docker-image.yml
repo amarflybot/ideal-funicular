@@ -10,38 +10,25 @@ jobs:
 
   buildAndTest:
 
-    runs-on: ubuntu-latest
+    runs-on: node:16-alpine3.12
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: node install
+    - name: install
       run: |
-        npm i
-        npm run test
-        npm run lint
+        cd packages/api
+        yarn install
+        cd ../..
+        cd packages/policy-app
+        yarn install
 
-  start:
-    needs: buildAndTest
-    runs-on: ubuntu-latest
-    environment:
-      name: dev
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: node install
+    - name: test
       run: |
-        echo ${{ env.SECRET }}
-        npm i
-        npm run start
+        cd packages/api
+        yarn run test
+        cd ../..
+        cd packages/policy-app
+        yarn run test
 
-  deploy:
-    needs: start
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: docker build
-      run: docker build . --file Dockerfile --tag amarflybot/ideal-funicular:$(date +%s)
 
