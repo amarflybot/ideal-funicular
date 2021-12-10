@@ -3,7 +3,7 @@ version: '3.5'
 services:
   build:
     build:
-      context: .
+      context: packages/api
       target: development
     command: >
       sh -c "yarn install --only=development"
@@ -15,7 +15,7 @@ services:
   service:
     container_name: ideal-service
     build:
-      context: .
+      context: packages/api
       target: development
     command: yarn run start:debug
     ports:
