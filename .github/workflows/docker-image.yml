@@ -10,7 +10,7 @@ jobs:
 
   buildAndTest:
 
-    runs-on: node:16-alpine3.12
+    runs-on: node:lts-gallium
 
     steps:
     - uses: actions/checkout@v2
