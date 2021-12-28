@@ -5,7 +5,7 @@ services:
   frontend:
     container_name: ideal-ui
     build:
-      context: packages/policy-app
+      context: packages/ui
       target: development
     command: >
       sh -c "yarn install --only=development
