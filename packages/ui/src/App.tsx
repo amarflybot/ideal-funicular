@@ -21,7 +21,7 @@ export default function App() {
         <Box sx={{ my: 4 }}>
           <Typography variant="h4" component="h1" gutterBottom>
             Expensify
-              <ExpenseItem/>
+              {[...Array(10)].map((x, i) => <ExpenseItem x={i}/>)}
           </Typography>
           <Copyright />
         </Box>
